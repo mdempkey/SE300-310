@@ -12,7 +12,6 @@ public class MockArgumentMatchersTest {
 
         store.currentStock("SKU-123");
 
-        // Verify that getStock was called with "SKU-123"
         verify(mockInventory).getStock(ArgumentMatchers.eq("SKU-123"));
     }
 }
