@@ -111,6 +111,7 @@ public class CompleteTest {
         // TODO: Complete this teardown method for lifecycle demonstration
     }
     
+
     @Test
     @Order(4)
     void lifeCycleTest() throws LedgerException {
@@ -121,7 +122,7 @@ public class CompleteTest {
    
     assertEquals(0, testLedger.getNumberOfBlocks());
     }
-    }
+    
     
     @Order(5)
     @Test
@@ -243,9 +244,9 @@ public class CompleteTest {
     
     @Test
     @Order(10)
+
     void assumptionsTest() {
- @Test
-         void runOnlyIfSkuIsValid() {
+    // removed stray @Test/method declaration; assertions run inside assumptionsTest()() {
         Product product = new Product("SKU-001", "Widget", 9.99);
 
         assumeTrue(product.getSku().startsWith("SKU-"));
@@ -267,7 +268,7 @@ public class CompleteTest {
         assertEquals("DevTool", product.getName()); 
     }
 
-    }
+    
     
     @Test
     @Order(11)
