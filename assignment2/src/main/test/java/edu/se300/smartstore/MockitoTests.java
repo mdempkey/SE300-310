@@ -10,6 +10,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import edu.se300.smartstore.model.Inventory;
+import edu.se300.smartstore.model.Product;
+import org.junit.jupiter.api.*;
 
 public class MockitoTests {
 
