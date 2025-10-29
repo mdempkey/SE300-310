@@ -314,11 +314,27 @@ public class CompleteTest {
     @Test
     @Order(15)
     void endToEndLedgerTest() {
-        // TODO: Produce/Print Identical Results to Command Line DriverTest
-        // TODO: Complete end-to-end test to demonstrate Arrange-ACT-Assert pattern
-        //  - Arrange: Create a new ledger instance with proper initialization and reset
-        //  - Act: Execute all the blockchain operations (account creation, transactions, validations, etc.)
-        //  - Assert: Use JUnit assertions throughout to verify expected behavior at each step
+       Ledger ledger = new Ledger();
+        ledger.reset(); // clears all previous state
+        ledger.createAccount("Alice");
+        ledger.createAccount("Bob");
+
+        // Act
+        ledger.deposit("Alice", 100.00);
+        ledger.transfer("Alice", "Bob", 40.00);
+        ledger.deposit("Bob", 10.00);
+        ledger.validateLedger(); // optional: runs internal consistency checks
+
+        // Assert
+        assertEquals(60.00, ledger.getBalance("Alice"), 0.01);
+        assertEquals(50.00, ledger.getBalance("Bob"), 0.01);
+
+        Transaction lastTx = ledger.getLastTransaction();
+        assertNotNull(lastTx);
+        assertEquals("Bob", lastTx.getReceiver());
+        assertEquals(10.00, lastTx.getAmount(), 0.01);
+
+        assertTrue(ledger.isValid());
     }
     
     // Additional comprehensive Mockito tests
