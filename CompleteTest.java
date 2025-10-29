@@ -94,6 +94,23 @@ public class CompleteTest {
             assertNotNull(ledger.getBlock(1));
         }
     
+    @BeforeEach
+        void setUp() throws LedgerException {
+            // make a new ledger before each test
+            testLedger = Ledger.getInstance("life-ledger", "desc", "seed");
+            testLedger.reset();
+            testLedger.createAccount("mary");
+        }
+        // TODO: Complete this setup method for lifecycle demonstration
+   
+
+
+        @AfterEach void tearDown() {
+            // clear the ledger after each test
+            testLedger = null;
+        // TODO: Complete this teardown method for lifecycle demonstration
+    }
+    
     @Test
     @Order(4)
     void lifeCycleTest() throws LedgerException {
