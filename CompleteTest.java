@@ -315,7 +315,7 @@ public class CompleteTest {
     @Order(15)
     void endToEndLedgerTest() {
        Ledger ledger = new Ledger();
-        ledger.reset(); // clears all previous state
+        ledger.reset(); // clears before
         ledger.createAccount("Alice");
         ledger.createAccount("Bob");
 
@@ -323,7 +323,7 @@ public class CompleteTest {
         ledger.deposit("Alice", 100.00);
         ledger.transfer("Alice", "Bob", 40.00);
         ledger.deposit("Bob", 10.00);
-        ledger.validateLedger(); // optional: runs internal consistency checks
+        ledger.validateLedger(); /
 
         // Assert
         assertEquals(60.00, ledger.getBalance("Alice"), 0.01);
