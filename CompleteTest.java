@@ -227,8 +227,29 @@ public class CompleteTest {
     @Test
     @Order(10)
     void assumptionsTest() {
-        // TODO: Complete this test to demonstrate using assumptions (assumeTrue, assumeFalse, assumingThat, etc.)
-        // TODO: At least 3 different assumptions
+ @Test
+         void runOnlyIfSkuIsValid() {
+        Product product = new Product("SKU-001", "Widget", 9.99);
+
+        assumeTrue(product.getSku().startsWith("SKU-"));
+        assertEquals("Widget", product.getName());
+    }
+        
+@Test
+    void skipIfPriceIsZero() {
+        Product product = new Product("SKU-002", "Freebie", 0.00);
+
+        assumeFalse(product.getPrice() == 0.00);
+        assertTrue(product.getPrice() > 0);
+    }
+
+@Test
+    @EnabledIfEnvironmentVariable(named = "ENV", matches = "dev")
+    void onlyRunInDevEnvironment() {
+        Product product = new Product("SKU-003", "DevTool", 19.99);
+        assertEquals("DevTool", product.getName()); 
+    }
+
     }
     
     @Test
