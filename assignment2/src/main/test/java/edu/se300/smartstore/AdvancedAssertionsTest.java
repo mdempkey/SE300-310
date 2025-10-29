@@ -19,7 +19,7 @@ public class AdvancedAssertionsTest {
         inv.updateStock("SKU-002", 5);
 
         assertAll("Inventory checks",
-            () -> assertEquals(2, inv.getStock("SKU-001") + inv.getStock("SKU-002")),
+            () -> assertEquals(15, inv.getStock("SKU-001") + inv.getStock("SKU-002")),
             () -> assertTrue(inv.hasProduct("SKU-001")),
             () -> assertThrows(IllegalArgumentException.class, () -> inv.getStock("SKU-999"))
         );

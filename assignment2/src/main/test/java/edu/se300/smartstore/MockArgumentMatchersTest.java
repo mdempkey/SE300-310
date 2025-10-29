@@ -1,5 +1,10 @@
 package edu.se300.smartstore;
 
+import edu.se300.smartstore.model.Inventory;
+import edu.se300.smartstore.model.Product;
+import edu.se300.smartstore.service.StoreService;
+import org.junit.jupiter.api.*;
+import org.mockito.ArgumentMatchers;
 
 import static org.mockito.Mockito.*;
 

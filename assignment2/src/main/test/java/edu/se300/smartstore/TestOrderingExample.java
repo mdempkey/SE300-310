@@ -1,6 +1,8 @@
 package edu.se300.smartstore;
 
-
+import edu.se300.smartstore.model.Inventory;
+import edu.se300.smartstore.model.Product;
+import org.junit.jupiter.api.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
