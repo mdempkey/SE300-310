@@ -3,6 +3,7 @@ package com.se300.ledger.complete;
 import com.se300.ledger.*;
 import com.se300.ledger.command.CommandProcessor;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,10 +12,12 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.Arguments;
 import org.mockito.Mockito;
-import org.mockito.ArgumentMatchers;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
 import java.util.stream.Stream;
+
 
 // Import Smart Store classes for testing
 import edu.se300.smartstore.model.Inventory;
@@ -23,69 +26,122 @@ import edu.se300.smartstore.service.StoreService;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class CompleteTest {
-    /* TODO: The following
-     * 1. Achieve 100% Test Coverage
-     * 2. Produce/Print Identical Results to Command Line DriverTest
-     * 3. Produce Quality Report
-     */
+    Ledger testLedger;
+
     
-    static Inventory staticInventory;
-    
-    @BeforeAll
-    static void setupAll() {
-        staticInventory = new Inventory();
-        staticInventory.addProduct(new Product("SKU-001", "Widget", 9.99));
-    }
-    
-    @BeforeEach
-    void setUp() {
-        // Setup method for lifecycle demonstration
-        System.out.println("Setting up test...");
-    }
-    
-    @AfterEach
-    void tearDown() {
-        // Teardown method for lifecycle demonstration
-        System.out.println("Tearing down test...");
-    }
-    
-    @Test
+    @ParameterizedTest
     @Order(1)
-    void parameterizedValueSourcesTest() {
-        // TODO: Complete this test to demonstrate parameterized testing with simple value sources
-    }
+     void parameterizedValueSourcesTest(String address) throws LedgerException {
+         // create a fresh ledger each time so tests don’t interfere
+         Ledger ledger = Ledger.getInstance("test-ledger", "desc", "seed");
+         ledger.reset();
+     
+         // try making a new account
+         Account acc = ledger.createAccount(address);
+     
+         // basic checks
+         assertNotNull(acc);
+         assertEquals(address, acc.getAddress());
+     
+         // making the same account again should fail
+         assertThrows(LedgerException.class, () -> ledger.createAccount(address));
+     }
+
     
     @Test
-    @Order(2)
-    void parameterizedComplexSourcesTest() {
+        @Order(2)
+        @ParameterizedTest
+        @CsvSource({"mary, 1000", "bob, 1000", "bill, 1000", "frank, 1000", "jane, 0"})
+        void parameterizedComplexSourcesTest(String address, int balance) throws LedgerException {
+            // set up a new ledger for each test so they don’t share data
+            Ledger ledger = Ledger.getInstance("complex-ledger", "desc", "seed");
+            ledger.reset();
+       
+            // make a new account and assign a balance
+            Account acc = ledger.createAccount(address);
+            acc.setBalance(balance);
+       
+            // check that everything worked right
+            assertNotNull(acc);
+            assertEquals(address, acc.getAddress());
+            assertEquals(balance, acc.getBalance());
+       
+            // try creating the same account again to make sure it throws an error
+            assertThrows(LedgerException.class, () -> ledger.createAccount(address));
+        }
         // TODO: Complete this test to demonstrate parameterized testing with complex sources like CSV, method sources, etc.
-    }
+
     
     @Test
     @Order(3)
-    void repeatedTest() {
-        // TODO: Complete this test to demonstrate repeated test execution
-    }
+    @RepeatedTest(3)
+    void repeatedTest(RepetitionInfo info) throws LedgerException {
+            Ledger ledger = Ledger.getInstance("test-ledger", "desc", "seed");
+            ledger.reset();
+       
+            Account payer = ledger.createAccount("payer");
+            payer.setBalance(10_000);
+            Account recv = ledger.createAccount("receiver");
+       
+            for (int i = 1; i <= 10; i++) {
+                ledger.processTransaction(new Transaction(
+                    "r" + info.getCurrentRepetition() + "-" + i,
+                    1, 10, "n", payer, recv
+                ));
+            }
+       
+            assertEquals(1, ledger.getNumberOfBlocks());
+            assertNotNull(ledger.getBlock(1));
+        }
     
     @Test
     @Order(4)
-    void lifeCycleTest() {
-        // Demonstrates test lifecycle with BeforeEach, AfterEach, BeforeAll, AfterAll
-        assertNotNull(staticInventory);
-        System.out.println("Lifecycle test executed");
+    void lifeCycleTest() throws LedgerException {
+    assertNotNull(testLedger);
+   
+    Account acc = testLedger.getUncommittedBlock().getAccount("mary");
+    assertNotNull(acc);
+   
+    assertEquals(0, testLedger.getNumberOfBlocks());
+    }
     }
     
-    @Test
     @Order(5)
-    void conditionalTest() {
-        // TODO: Complete this test to demonstrate conditional test execution based on condition
-    }
-    
     @Test
+    @EnabledIfSystemProperty(named = "RUN_GETSET", matches = "true")
+    void conditionalTest() throws LedgerException {
+    boolean enabled = Boolean.getBoolean("RUN_GETSET")
+        || "true".equalsIgnoreCase(System.getenv("RUN_GETSET"));
+    assumeTrue(enabled, "Run with -DRUN_GETSET=true or env RUN_GETSET=true");
+        
+    Account acc = new Account("mary", 0);
+    acc.setBalance(50);
+    assertEquals("mary", acc.getAddress());
+    assertEquals(50, acc.getBalance());
+        
+    Block block = new Block(1, "hash0");
+    block.setHash("hash1");
+    assertEquals("hash1", block.getHash());
+        
+    Transaction t = new Transaction("t1", 5, 1, "note", acc, acc);
+    assertEquals("t1", t.getTransactionId());
+    assertNotNull(t.toString());
+}
+    
+    @Tag("Basic")
     @Order(6)
-    void taggedTest() {
-        // TODO: Complete this test to demonstrate test tagging for selective execution
-    }
+    @Test
+    void taggedTest() throws LedgerException {
+        Ledger ledger = Ledger.getInstance("tag-ledger", "desc", "seed");
+        ledger.reset();
+
+        Account acc = ledger.createAccount("bob");
+        acc.setBalance(100);
+
+        assertEquals("bob", acc.getAddress());
+        assertEquals(100, acc.getBalance());
+        assertTrue(acc.getBalance() > 0);
+}
     
     @Nested
     class NestedTestClass {
